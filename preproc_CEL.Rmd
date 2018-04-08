@@ -1,0 +1,29 @@
+---
+title: "Typical .CEL file preprocessing in R"
+output: html_notebook
+---
+
+For this test, we'll use any of the .CEL files published in [this](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?token=trmzbecoaqyugtc&acc=GSE43358) study. We'll then extract the .CEL file and proceed to preprocess it using R.
+
+The code blocs are executed by using *Ctrl+Shift+Enter*. 
+
+We name the file *tesq.CEL* and put it in the same directory as the notebook.
+
+```{r}
+library("affy")
+
+cel = dir(path="tesq.CEL")
+samples = ReadAffy(filenames=cel)
+arr = rma(samples)
+expressions = exprs(arr)
+print(expressions)
+```
+
+The array *expressions* is an array of [gene expression](https://en.wikipedia.org/wiki/Gene_expression) values in breast tissue (normalized according to the documentation). The base hypothesis is that we can use those values as low level features a neural network could exploit to make predictions on phenotypic traits(in our case, the probability of breast cancer occurring). We persist the array on disk as a .csv file to pursue  further processing in Python:
+
+```{r}
+write.table(expressions, file="expressions.csv", quote=F, col.names=c("id;value"), sep=";", row.names=T)
+```
+
+
+
